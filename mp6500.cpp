@@ -5,7 +5,7 @@ MP6500::MP6500(uint8_t acc_conf, uint8_t gyro_conf) {
     _acc_conf = acc_conf;
     _gyro_conf = gyro_conf;
 
-    switch (acc_conf) {
+    switch (gyro_conf) {
         case GYRO_FULL_SCALE_250_DPS:
             _gyro_scale = 250.0F;
             break;
@@ -20,7 +20,7 @@ MP6500::MP6500(uint8_t acc_conf, uint8_t gyro_conf) {
             break;
     };
 
-    switch (gyro_conf) {
+    switch (acc_conf) {
         case ACC_FULL_SCALE_2_G:
             _acc_scale = 2.0F * SENSORS_GRAVITY_EARTH;
             break;
@@ -34,9 +34,6 @@ MP6500::MP6500(uint8_t acc_conf, uint8_t gyro_conf) {
             _acc_scale = 16.0F * SENSORS_GRAVITY_EARTH;
             break;
     };
-
-	Serial.printf("CONSTRUCTOR acc_scale: %f, gyro_scale: %f\n", _acc_scale, _gyro_scale);
-
 }
 
 // Public
@@ -76,7 +73,8 @@ void MP6500::CalibrateGyro(uint32_t numberOfReads) {
 	Serial.println("CALIBRATION");
 	delay(2000);
 
-	const int16_t calibration_const = -2;
+	const float calibration_const = -_gyro_scale / 1000.0F; // Not documented but works way better
+
 	int16_t zeros[] = {0, 0, 0};
 	__I2CwriteWords(MPU6500_ADDRESS, REG_GYRO_OFFSET, zeros, 3);
 	delay(10);
